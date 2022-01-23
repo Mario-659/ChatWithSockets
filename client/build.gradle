@@ -1,0 +1,31 @@
+plugins {
+    //shadow for fatJars
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+
+    id 'ChatWithSockets.java-application-conventions'
+}
+
+project.setProperty("mainClassName", "ChatWithSockets.client.RunClient")
+
+version 'unspecified'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+
+    implementation project(":shared")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar{
+    manifest {
+        attributes 'Main-Class': "ChatWithSockets.client.RunClient"
+    }
+}
