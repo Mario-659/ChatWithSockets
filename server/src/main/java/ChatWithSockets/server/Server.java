@@ -1,22 +1,41 @@
 package ChatWithSockets.server;
 
-import ChatWithSockets.shared.Client;
-import ChatWithSockets.shared.Request.Request;
 import lombok.extern.log4j.Log4j2;
 
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 @Log4j2
-public class Server implements ChatWithSockets.shared.Server {
-    ClientManager clientManager = new ClientManager(this);
+public class Server {
+    private final int BACKLOG = 50;
+    private ServerSocket serverSocket;
+    private ClientManager manager = new ClientManager();
 
-    public Server(int port) throws RemoteException {
-        UnicastRemoteObject.exportObject(this, port);
+    public Server(String host, int port){
+        try {
+            log.debug("Starting server at host: " + host + " ,port: " + port);
+            serverSocket = new ServerSocket(port, BACKLOG, InetAddress.getByName(host));
+            log.debug("Server started");
+        } catch (IOException e) {
+            log.error(e);
+        }
     }
 
-    @Override
-    public void sendRequest(Request request, Client client) throws RemoteException {
-        clientManager.processRequest(request, client);
+    public Server(){
+        this("localhost", 55);
+    }
+
+    public void run(){
+        while(true){
+            try {
+                Socket clientSocket = serverSocket.accept();
+                log.debug("New client accepted");
+                manager.addClient(clientSocket);
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
+        }
     }
 }

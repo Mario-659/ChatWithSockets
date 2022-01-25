@@ -33,6 +33,7 @@ public class WithoutChannel extends State{
 
     @Override
     public void handleRequest(Request request, Controller controller) {
+//        display(request);
         switch (request.getType()){
             case PING:break;
             case REQUESTSUCCEEDED:
@@ -49,7 +50,10 @@ public class WithoutChannel extends State{
             display("\n" + request.getPayload());
             run();
         } else {
-            controller.changeState(new InChannel(controller, request.getPayload()));
+            this.interrupt();
+            InChannel state = new InChannel(controller, request.getPayload());
+            controller.changeState(state);
+            state.start();
         }
     }
 

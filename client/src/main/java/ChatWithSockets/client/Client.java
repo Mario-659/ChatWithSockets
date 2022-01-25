@@ -1,31 +1,26 @@
 package ChatWithSockets.client;
 
-import ChatWithSockets.shared.Request.Request;
-import ChatWithSockets.shared.Server;
+import java.net.Socket;
 
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 
-public class Client implements ChatWithSockets.shared.Client {
-    private Server server;
+public class Client {
     Controller controller;
 
-    public Client() throws  RemoteException {
-        UnicastRemoteObject.exportObject(this, 0);
-    }
-
-    @Override
-    public void sendRequest(Request request, Server server) throws RemoteException {
-        controller.processRequest(request, server);
-    }
-
-    public void startClient() throws RemoteException, NotBoundException {
-        Registry registry = LocateRegistry.getRegistry("localhost", 1099);
-        server = (Server) registry.lookup("Server");
-        controller = new Controller(this, server);
+    public void startClient() {
+        tryConnect();
         controller.start();
+    }
+
+    public void tryConnect(String host, int port) {
+        try{
+            Socket socket = new Socket(host, port);
+            controller = new Controller(socket);
+        } catch (Exception e) {
+            System.out.println("Failed to connect with given arguments");
+        }
+    }
+
+    public void tryConnect(){
+        tryConnect("localhost", 55);
     }
 }

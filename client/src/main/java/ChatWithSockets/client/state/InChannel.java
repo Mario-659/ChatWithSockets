@@ -22,6 +22,7 @@ public class InChannel extends State{
 
     @Override
     public void handleRequest(Request request, Controller controller) {
+        display(request);
         switch (request.getType()){
             case PING: break;
             case REQUESTSUCCEEDED:
@@ -34,6 +35,9 @@ public class InChannel extends State{
     }
 
     private void handleSucceeded() {
-        controller.changeState(new WithoutChannel(controller));
+        this.interrupt();
+        WithoutChannel state = new WithoutChannel(controller);
+        controller.changeState(state);
+        state.start();
     }
 }

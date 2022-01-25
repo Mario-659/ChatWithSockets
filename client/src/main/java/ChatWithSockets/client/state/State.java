@@ -6,7 +6,7 @@ import ChatWithSockets.shared.Request.RequestType;
 
 import java.util.Scanner;
 
-public abstract class State {
+public abstract class State extends Thread{
     public abstract void handleRequest(Request request, Controller controller);
 
     protected final Controller controller;
@@ -17,6 +17,7 @@ public abstract class State {
         this.controller = controller;
     }
 
+    @Override
     public abstract void run();
 
     protected void display(String text){
@@ -25,7 +26,7 @@ public abstract class State {
 
     protected void displayInfo(String info){
         System.out.println("*****************************");
-        System.out.println("\t\t" + info);
+        System.out.println(info);
         System.out.println("*****************************");
     }
 
@@ -57,14 +58,13 @@ public abstract class State {
         System.out.println("Error: " + request.getPayload());
     }
 
-
-    protected String getInput(){
-        return scanner.nextLine();
-    }
-
     protected void sendRequest(RequestType type, String payload){
         Request request = new Request(type, payload);
         lastRequest = request;
         controller.sendRequest(request);
+    }
+
+    protected String getInput(){
+        return scanner.nextLine();
     }
 }
