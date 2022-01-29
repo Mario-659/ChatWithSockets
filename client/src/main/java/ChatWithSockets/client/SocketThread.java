@@ -18,7 +18,6 @@ public class SocketThread extends Thread {
             toServer = new ObjectOutputStream(socket.getOutputStream());
             fromServer = new ObjectInputStream(socket.getInputStream());
         } catch (IOException e) {
-            //TODO delete stackTrace
             e.printStackTrace();
         }
     }
@@ -31,8 +30,7 @@ public class SocketThread extends Thread {
                 controller.processRequest(request);
             }
         }catch(IOException | ClassNotFoundException e){
-            //TODO delete stackTrace
-            e.printStackTrace();
+            handleConnectionLost(e);
         }
     }
 
@@ -40,9 +38,14 @@ public class SocketThread extends Thread {
         try {
             toServer.writeObject(request);
         } catch (IOException e) {
-            //TODO delete stackTrace
-            e.printStackTrace();
+            handleConnectionLost(e);
         }
+    }
+
+    private void handleConnectionLost(Exception e){
+        System.out.println("Lost connection with server\n" +
+                "Error message: " + e.getMessage());
+        System.exit(0);
     }
 }
 

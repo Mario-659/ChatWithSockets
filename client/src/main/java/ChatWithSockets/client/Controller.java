@@ -6,19 +6,24 @@ import ChatWithSockets.client.state.WithoutChannel;
 
 import java.net.Socket;
 
-
 public class Controller{
     private State state;
-    private SocketThread socketThread;
+    private final SocketThread socketThread;
+    private final UserInput userInput;
 
     public Controller(Socket socket) {
         socketThread = new SocketThread(socket, this);
-        this.state = new WithoutChannel(this);
+        userInput = new UserInput(this);
     }
 
     public void start(){
+        this.state = new WithoutChannel(this);
         socketThread.start();
-        state.run();
+        userInput.start();
+    }
+
+    public void processInput(String input){
+        state.handleInput(input);
     }
 
     public void processRequest(Request request){
@@ -27,7 +32,6 @@ public class Controller{
 
     public void changeState(State state){
         this.state = state;
-        state.run();
     }
 
     public void sendRequest(Request request){

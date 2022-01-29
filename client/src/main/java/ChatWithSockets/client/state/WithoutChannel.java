@@ -4,36 +4,17 @@ import ChatWithSockets.shared.Request.Request;
 import ChatWithSockets.client.Controller;
 import ChatWithSockets.shared.Request.RequestType;
 
+import java.io.IOException;
+
 public class WithoutChannel extends State{
 
     public WithoutChannel(Controller controller){
         super(controller);
         displayInfo("You are now without a channel");
-    }
-
-    @Override
-    public void run(){
         display(options);
-        String input = getInput();
-        switch (input){
-            case "join":
-                handleJoin();
-                break;
-            case "create":
-                handleCreate();
-                break;
-            case "get":
-                handleGet();
-                break;
-            default:
-                displayInfo("Invalid data. Try again");
-                run();
-        }
     }
-
     @Override
     public void handleRequest(Request request, Controller controller) {
-//        display(request);
         switch (request.getType()){
             case PING:break;
             case REQUESTSUCCEEDED:
@@ -41,44 +22,77 @@ public class WithoutChannel extends State{
                 break;
             default:
                 display(request.getPayload());
-                run();
+                display(options);
         }
+    }
+
+    @Override
+    public void handleInput(String input) {
+        switch (extractOption(input)) {
+            case "join":
+                handleJoin(input);
+                break;
+            case "create":
+                handleCreate(input);
+                break;
+            case "get":
+                handleGet();
+                break;
+            case "exit":
+                System.exit(0);
+                break;
+            default:
+                displayInfo("Invalid input. Try again");
+                display(options);
+        }
+    }
+
+    private String extractOption(String input) {
+        String[] data = input.split(" ");
+        return data[0];
     }
 
     private void handleSucceeded(Request request) {
         if (lastRequest != null && lastRequest.getType() == RequestType.GETCHANNELS) {
             display("\n" + request.getPayload());
-            run();
+            display(options);
         } else {
-            this.interrupt();
             InChannel state = new InChannel(controller, request.getPayload());
             controller.changeState(state);
-            state.start();
         }
     }
 
-    private void handleJoin(){
-        sendRequest(RequestType.JOINCHANNEL, getChannelData());
+    private void handleJoin(String input){
+        trySend(RequestType.JOINCHANNEL, input);
     }
 
-    private void handleCreate(){
-        sendRequest(RequestType.CREATECHANNEL, getChannelData());
+    private void handleCreate(String input){
+        trySend(RequestType.CREATECHANNEL, input);
+    }
+
+    private void trySend(RequestType type, String input){
+        try {
+            sendRequest(type, getChannelPayload(input));
+        } catch (IOException e) {
+            display(e.getMessage());
+        }
     }
 
     private void handleGet(){
         sendRequest(RequestType.GETCHANNELS, "");
     }
 
-    private String getChannelData(){
-        System.out.print("Channel name: ");
-        String channelName = getInput().strip().replace(",", "");
-        System.out.print("Username: ");
-        String username = getInput().strip().replace(",", "");
-        return channelName + "," + username;
+    private String getChannelPayload(String input) throws IOException {
+        String[] data = input.split(" ");
+        if(data.length != 3) throw new IOException("Invalid input");
+        else
+            return  data[1].strip().replace(",", "") + "," +
+                    data[2].strip().replace(",", "");
     }
 
-    private final String options = "\n\nAvailable options: \n" +
-                                    "create: Creates and joins new channel\n" +
-                                    "join: Joins existing channel\n" +
-                                    "get: Gets available channels";
+    private final String options = "\nAvailable options: \n" +
+                                    "create <channelName> <username>: Creates and joins new channel\n" +
+                                    "join <channelName> <username>: Joins existing channel\n" +
+                                    "get: Gets available channels\n" +
+                                    "exit: Close application";
 }

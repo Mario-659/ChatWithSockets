@@ -11,33 +11,30 @@ public class InChannel extends State{
     }
 
     @Override
-    public void run() {
-        String input = getInput();
-        while(!input.equals("exit")){
-            sendRequest(RequestType.SENDMESSAGE, input);
-            input = getInput();
-        }
-        sendRequest(RequestType.LEAVECHANNEL, "");
-    }
-
-    @Override
     public void handleRequest(Request request, Controller controller) {
-        display(request);
         switch (request.getType()){
             case PING: break;
             case REQUESTSUCCEEDED:
                 handleSucceeded();
                 break;
             default:
-                display(request.getPayload());
+                display(request);
                 break;
         }
     }
 
+    @Override
+    public void handleInput(String input) {
+        if(!input.equals("exit")){
+            sendRequest(RequestType.SENDMESSAGE, input);
+        }
+        else{
+            sendRequest(RequestType.LEAVECHANNEL, "");
+        }
+    }
+
     private void handleSucceeded() {
-        this.interrupt();
         WithoutChannel state = new WithoutChannel(controller);
         controller.changeState(state);
-        state.start();
     }
 }
