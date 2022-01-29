@@ -9,6 +9,10 @@ project.setProperty("mainClassName", "ChatWithSockets.client.RunClient")
 
 version 'unspecified'
 
+run {
+    standardInput = System.in
+}
+
 repositories {
     mavenCentral()
 }

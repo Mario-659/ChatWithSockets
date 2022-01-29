@@ -20,33 +20,27 @@ public class SocketThread extends Thread {
             toClient = new ObjectOutputStream(socket.getOutputStream());
             fromClient = new ObjectInputStream(socket.getInputStream());
         } catch (IOException e) {
-            //TODO delete stackTrace
-            e.printStackTrace();
             log.error("Error while creating IO stream objects: " + e);
         }
     }
 
     @Override
-    public void run() {
+    public void run(){
         try{
             while(true){
                 Request request = (Request) fromClient.readObject();
                 session.handleRequest(request);
             }
-        }catch(IOException | ClassNotFoundException e){
-            //TODO delete stackTrace
-            e.printStackTrace();
-            log.error("Error while receiving request from client: " + e);
+        }catch(ClassNotFoundException | IOException e){
+            session.close();
         }
     }
 
-    public synchronized void sendRequest(Request request) {
+    public void sendRequest(Request request) {
         try {
             toClient.writeObject(request);
         } catch (IOException e) {
-            //TODO delete stackTrace
-            e.printStackTrace();
-            log.error("Error while sending request to client: " + e);
+            session.close();
         }
     }
 }

@@ -13,18 +13,15 @@ public class Server {
     private ServerSocket serverSocket;
     private ClientManager manager = new ClientManager();
 
-    public Server(String host, int port){
+    public Server(String host, int port) throws IOException{
         try {
-            log.debug("Starting server at host: " + host + " ,port: " + port);
+            log.debug("Starting server at host: " + host + ", port: " + port);
             serverSocket = new ServerSocket(port, BACKLOG, InetAddress.getByName(host));
             log.debug("Server started");
         } catch (IOException e) {
             log.error(e);
+            throw e;
         }
-    }
-
-    public Server(){
-        this("localhost", 55);
     }
 
     public void run(){

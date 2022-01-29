@@ -35,12 +35,16 @@ public class ClientSession {
 
     public void sendRequest(Request request){
         socketThread.sendRequest(request);
-        //TODO add delete if connection lost
     }
 
     public void handleRequest(Request request) {
         reqHandler.handleRequest(request);
     }
+
+    public void close(){
+        clientManager.deleteClient(this);
+    }
+
 
     @Override
     public String toString() {
